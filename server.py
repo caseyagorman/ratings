@@ -108,6 +108,12 @@ def log_user_in():
 	# 		flash("Invalid password")
 	return redirect("/login")
 
+@app.route('/logout')
+def logout():
+	session.pop('user', None)
+	flash("Logged out")
+	return redirect('login')
+
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
