@@ -39,6 +39,18 @@ def user_list():
     users = User.query.all()
     return render_template("users.html", users=users)
 
+@app.route("/user_detail/<user>")
+def user_detail(user):
+    """Show list of users."""
+
+    print(user)
+
+    user = User.query.filter_by(user_id=user).one()
+
+    print(user)
+
+    return render_template("user_detail.html", user=user)
+
 @app.route("/register", methods=['GET'])
 def get_registration_form():
 
@@ -66,7 +78,7 @@ def registration_process():
 
 @app.route("/login", methods=['GET'])
 def get_login_form():
-	if session.get('user'):
+	if session.get('user'):		
 		return redirect("/")
 
 
@@ -83,13 +95,15 @@ def log_user_in():
 	user = User.query.filter_by(email = email).first()
 
 	print(user)
+	print(user.user_id)
 
 	if user:
 		print("something exists")
 		if password == user.password:
 			session['user'] = user.email
 			flash("Logged in")
-			return redirect("/")
+			return render_template("user_detail.html",
+									user=user)
 		else:
 			print("Invalid password")
 			flash("Invalid password")
@@ -98,19 +112,11 @@ def log_user_in():
 		print("doesn't exist")
 		return redirect("/register")
 
-	# if user == []:
-	# 	return redirect("/register")
-	# else:
-	# 	if password == user.password:
-	# 		flash("Logged in")
-	# 		return redirect("/")
-	# 	else:
-	# 		flash("Invalid password")
 	return redirect("/login")
 
 @app.route('/logout')
 def logout():
-	session.pop('user', None)
+	session.clear()
 	flash("Logged out")
 	return redirect('login')
 
