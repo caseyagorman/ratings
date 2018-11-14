@@ -78,6 +78,10 @@ def movie_detail(movie):
 
     return render_template("movie_detail.html", movie=movie, ratings=movie.ratings, released_at=released_at)   
 
+@app.route("/add-rating", methods=['POST'])
+def add_rating():
+	pass
+
 @app.route("/register", methods=['GET'])
 def get_registration_form():
 

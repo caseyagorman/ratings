@@ -4,6 +4,7 @@
 {% if session['user'] %}
 <a href="{{ url_for('logout') }}">Log Out</a>
 {% endif %}
+
 {% if movie %}
 <h1>{{movie.title}}</h1>
 <h2>{{ released_at}}</h2>
@@ -14,8 +15,9 @@
 <li>{{rating.score}}</li>
 {% endfor %}
 </ul>
-
 {% endif %}
 
+<form action="/add-rating" method="POST">
+</form>
 
 {% endblock %}
