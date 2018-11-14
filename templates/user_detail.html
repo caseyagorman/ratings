@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if session['user'] %}
+<a href="{{ url_for('logout') }}">Log Out</a>
+{% endif %}
+
+<h1>Email: {{user.email}}</h1>
+<h2>Zipcode: {{user.zipcode}}</h2>
+<h2>Age: {{user.age}}</h2>
+
+
+{% endblock %}

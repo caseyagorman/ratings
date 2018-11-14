@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if session['user'] %}
+<a href="{{ url_for('logout') }}">Log Out</a>
+{% endif %}
+{% if movie %}
+<h1>{{movie.title}}</h1>
+<h2>{{ released_at}}</h2>
+<h2>{{ movie.imdb_url }}</h2>
+<ul>
+<h3>Scores</h3>
+{% for rating in ratings %}
+<li>{{rating.score}}</li>
+{% endfor %}
+</ul>
+
+{% endif %}
+
+
+{% endblock %}

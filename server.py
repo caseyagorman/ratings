@@ -8,6 +8,7 @@ from flask import (Flask, render_template, redirect, request, flash,
                    session, jsonify)
 
 from model import User, Rating, Movie, connect_to_db, db
+import operator
 
 
 app = Flask(__name__)
@@ -50,6 +51,32 @@ def user_detail(user):
     print(user)
 
     return render_template("user_detail.html", user=user)
+
+
+@app.route("/movies")
+def movie_list():
+    """Show list of users."""
+
+    movies = Movie.query.all()
+    movies = sorted(movies, key=operator.attrgetter('title'))
+    # https://stackoverflow.com/questions/403421/how-to-sort-a-list-of-objects-based-on-an-attribute-of-the-objects
+
+    return render_template("movies.html", movies=movies)
+
+
+@app.route("/movie_detail/<movie>")
+def movie_detail(movie):
+    """Show list of users."""
+    print(movie)
+    movie = Movie.query.filter_by(movie_id=movie).options(db.joinedload('ratings')).first()
+    released_at= movie.released_at
+    released_at=released_at.strftime('%b %d, %Y')
+    # print(movie.ratings)
+    # for movie in movie.ratings:
+    # 	print(ratings.score)
+
+
+    return render_template("movie_detail.html", movie=movie, ratings=movie.ratings, released_at=released_at)   
 
 @app.route("/register", methods=['GET'])
 def get_registration_form():
