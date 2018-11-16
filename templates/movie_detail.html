@@ -12,12 +12,20 @@
 <ul>
 <h3>Scores</h3>
 {% for rating in ratings %}
-<li>{{rating.score}}</li>
+<li><a href="/rating_detail/{{rating.rating_id}}">{{rating.score}}</a></li>
 {% endfor %}
 </ul>
 {% endif %}
 
 <form action="/add-rating" method="POST">
+	Rating: <select name="ratingform">
+		<option value="1">1</option>
+		<option value="2">2</option>
+		<option value="3">3</option>
+		<option value="4">4</option>
+		<option value="5">5</option>
+	</select>
+	<input type="submit" name="ratingsubmit">
 </form>
 
 {% endblock %}

@@ -5,7 +5,7 @@ from jinja2 import StrictUndefined
 from flask_debugtoolbar import DebugToolbarExtension
 
 from flask import (Flask, render_template, redirect, request, flash,
-                   session, jsonify)
+                   session, jsonify, url_for)
 
 from model import User, Rating, Movie, connect_to_db, db
 import operator
@@ -64,23 +64,52 @@ def movie_list():
     return render_template("movies.html", movies=movies)
 
 
-@app.route("/movie_detail/<movie>")
+@app.route("/movie_detail/<movie>", methods=['GET'])
 def movie_detail(movie):
-    """Show list of users."""
-    print(movie)
+    """Show list of movies."""
+
+    session['movie']=movie
     movie = Movie.query.filter_by(movie_id=movie).options(db.joinedload('ratings')).first()
     released_at= movie.released_at
     released_at=released_at.strftime('%b %d, %Y')
-    # print(movie.ratings)
-    # for movie in movie.ratings:
-    # 	print(ratings.score)
-
 
     return render_template("movie_detail.html", movie=movie, ratings=movie.ratings, released_at=released_at)   
 
 @app.route("/add-rating", methods=['POST'])
 def add_rating():
-	pass
+
+	rating = request.form.get("ratingform")
+
+	movie_id = session['movie']
+	email = session['user']
+	user = User.query.filter_by(email = email).first()
+
+	rating = Rating(movie_id=movie_id, user_id=user.user_id, score=rating)
+	db.session.add(rating)
+	db.session.commit()
+
+	return redirect(url_for('movie_detail', movie=movie_id))
+
+@app.route("/rating_detail/<rating>", methods=['GET'])
+def rating_detail(rating):
+    """Show list of movies."""
+
+    rating = Rating.query.filter_by(rating_id=rating).first()
+    print(rating)
+    session['rating_id'] = rating.rating_id
+
+    return render_template("rating_detail.html", rating=rating)
+
+@app.route("/edit-rating", methods=['POST'])
+def edit_rating():
+
+	new_rating = request.form.get("edit-rating-form")
+
+	rating = Rating.query.filter_by(rating_id=session['rating_id']).one()
+	rating.score = new_rating
+	db.session.commit()
+
+	return redirect(url_for('rating_detail', rating=rating.rating_id))
 
 @app.route("/register", methods=['GET'])
 def get_registration_form():
