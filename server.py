@@ -73,6 +73,8 @@ def movie_detail(movie):
     released_at= movie.released_at
     released_at=released_at.strftime('%b %d, %Y')
 
+    session['movie_title'] = movie.title
+
     return render_template("movie_detail.html", movie=movie, ratings=movie.ratings, released_at=released_at)   
 
 @app.route("/add-rating", methods=['POST'])
