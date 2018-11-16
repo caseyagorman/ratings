@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 
-{% if session['user'] %}
-<a href="{{ url_for('logout') }}">Log Out</a>
-{% endif %}
   <h2>Users</h2>
 
   <ul>

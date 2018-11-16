@@ -27,29 +27,23 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 @app.route('/')
 def index():
     """Homepage."""
-
     if session.get('user'):
-    	return render_template("homepage.html")
+      return render_template("homepage.html")
     else:
-    	return redirect("/login")
+      return redirect("/login")
+
 
 @app.route("/users")
 def user_list():
     """Show list of users."""
-
     users = User.query.all()
     return render_template("users.html", users=users)
+
 
 @app.route("/user_detail/<user>")
 def user_detail(user):
     """Show list of users."""
-
-    print(user)
-
     user = User.query.filter_by(user_id=user).one()
-
-    print(user)
-
     return render_template("user_detail.html", user=user)
 
 
@@ -72,115 +66,106 @@ def movie_detail(movie):
     movie = Movie.query.filter_by(movie_id=movie).options(db.joinedload('ratings')).first()
     released_at= movie.released_at
     released_at=released_at.strftime('%b %d, %Y')
+    user = User.query.filter_by(email=session['user']).one()
 
     session['movie_title'] = movie.title
 
-    return render_template("movie_detail.html", movie=movie, ratings=movie.ratings, released_at=released_at)   
+    return render_template("movie_detail.html", movie=movie, ratings=movie.ratings, released_at=released_at, user=user)   
+
 
 @app.route("/add-rating", methods=['POST'])
 def add_rating():
 
-	rating = request.form.get("ratingform")
+  rating = request.form.get("ratingform")
 
-	movie_id = session['movie']
-	email = session['user']
-	user = User.query.filter_by(email = email).first()
+  movie_id = session['movie']
+  email = session['user']
+  user = User.query.filter_by(email = email).first()
+  
 
-	rating = Rating(movie_id=movie_id, user_id=user.user_id, score=rating)
-	db.session.add(rating)
-	db.session.commit()
+  rating = Rating(movie_id=movie_id, user_id=user.user_id, score=rating)
+  db.session.add(rating)
+  db.session.commit()
 
-	return redirect(url_for('movie_detail', movie=movie_id))
+  return redirect(url_for('movie_detail', movie=movie_id))
 
 @app.route("/rating_detail/<rating>", methods=['GET'])
 def rating_detail(rating):
     """Show list of movies."""
 
     rating = Rating.query.filter_by(rating_id=rating).first()
-    print(rating)
     session['rating_id'] = rating.rating_id
-
     return render_template("rating_detail.html", rating=rating)
+
 
 @app.route("/edit-rating", methods=['POST'])
 def edit_rating():
+  movie_id = session['movie']
 
-	new_rating = request.form.get("edit-rating-form")
+  new_rating = request.form.get("edit-rating-form")
 
-	rating = Rating.query.filter_by(rating_id=session['rating_id']).one()
-	rating.score = new_rating
-	db.session.commit()
+  rating = Rating.query.filter_by(rating_id=session['rating_id']).one()
+  rating.score = new_rating
+  db.session.commit()
 
-	return redirect(url_for('rating_detail', rating=rating.rating_id))
+  return redirect(url_for('movie_detail', movie=movie_id))
+
 
 @app.route("/register", methods=['GET'])
 def get_registration_form():
 
-	if session['user']:
-		print("user exists and is register")
-		return redirect('/')
-	else:
-		return render_template("registration.html")
+  if session.get('user'):
+    return redirect('/')
+  else:
+    return render_template("registration.html")
 
 
 @app.route("/register", methods=['POST'])
 def registration_process():
-	
-	email = request.form.get('email')
-	password = request.form.get('password')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    users = User.query.filter_by(email = email).all()
+    if users == []:
+        user = User(email=email, password=password)
+        db.session.add(user)
+        db.session.commit()
+    return redirect('/')
 
-	users = User.query.filter_by(email = email).all()
-
-	if users == []:
-		user = User(email=email, password=password)
-		db.session.add(user)
-		db.session.commit()
-
-	return redirect('/')
 
 @app.route("/login", methods=['GET'])
 def get_login_form():
-	if session.get('user'):		
-		return redirect("/")
+  if session.get('user'):   
+    return redirect("/")
+  return render_template("login.html")
 
-
-	return render_template("login.html")
 
 @app.route("/logged-in", methods=['GET'])
 def log_user_in():
-	email = request.args.get('email')
-	password = request.args.get('password')
+  email = request.args.get('email')
+  password = request.args.get('password')
 
-	print(email)
-	print(password)
+  user = User.query.filter_by(email = email).first()
 
-	user = User.query.filter_by(email = email).first()
+  if user:
+    if password == user.password:
+      session['user'] = user.email
+      flash("Logged in")
+      return render_template("user_detail.html",
+                  user=user)
+    else:
+      return redirect("/login")
+  else:
+    return redirect("/register")
 
-	print(user)
-	print(user.user_id)
+  return redirect("/login")
 
-	if user:
-		print("something exists")
-		if password == user.password:
-			session['user'] = user.email
-			flash("Logged in")
-			return render_template("user_detail.html",
-									user=user)
-		else:
-			print("Invalid password")
-			flash("Invalid password")
-			return redirect("/login")
-	else:
-		print("doesn't exist")
-		return redirect("/register")
-
-	return redirect("/login")
 
 @app.route('/logout')
 def logout():
-	session.clear()
-	flash("Logged out")
-	return redirect('login')
+  session.clear()
+  flash("Logged out")
+  return redirect('login')
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the

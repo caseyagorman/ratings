@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+
+<h1>{{session['movie_title']}}</h1>
+<h2>Score:{{ rating.score}}</h2>
+
+<form action="/edit-rating" method="POST">
+    New rating: <select name="edit-rating-form">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+    </select>
+    <input type="submit" name="ratingsubmit">
+</form>
+
+
+{% endblock %}
