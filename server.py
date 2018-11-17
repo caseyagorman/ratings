@@ -43,8 +43,8 @@ def user_list():
 @app.route("/user_detail/<user>")
 def user_detail(user):
     """Show list of users."""
-    user = User.query.filter_by(user_id=user).one()
-    return render_template("user_detail.html", user=user)
+    user = User.query.options(db.joinedload('ratings').joinedload('movie')).get(user_id)
+    return render_template("user.html", user=user)
 
 
 @app.route("/movies")
